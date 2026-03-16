@@ -1,0 +1,49 @@
+Events
+
+create_student
+
+EventInput
+  EventId
+  TraceId
+  Name
+  LastName
+  Grade
+  Group
+  DateOfBirth
+
+check_grades
+
+EventInput
+  EventId
+  TraceId
+  student_id
+
+set_grades_to_student
+
+EventInput
+  EventId
+  TraceId
+  student_id
+  Grade
+
+update_student_address
+
+EventInput
+  EventId
+  TraceId
+  student_id
+  Address
+
+graduate_student
+
+EventInput
+  EventId
+  TraceId
+  student_id
+
+send_grades_to_parents_on_first_day_of_month
+
+EventInput
+  EventId
+  TraceId
+  student_id

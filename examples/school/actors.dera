@@ -1,0 +1,13 @@
+Actors
+
+Student
+  check_grades
+
+Teacher
+  create_student
+  set_grades_to_student
+  update_student_address
+  graduate_student
+
+Agent
+  send_grades_to_parents_on_first_day_of_month

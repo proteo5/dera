@@ -1,0 +1,180 @@
+Action perform_student_creation
+
+EventInput
+  Name
+  LastName
+  Grade
+  Group
+  DateOfBirth
+
+ActionResult
+  student_id
+  academic_state
+
+BusinessRules
+  no_duplicate_student
+
+Steps
+  sanitize
+  validate
+  execute
+
+SideEffects
+  send_welcome_email
+
+---
+
+Action perform_check_grades
+
+EventInput
+  student_id
+
+ActionResult
+  grades
+
+Steps
+  sanitize
+  validate
+  execute
+
+---
+
+Action perform_set_grades
+
+EventInput
+  student_id
+  Grade
+
+ActionResult
+  student_id
+  Grade
+
+BusinessRules
+  student_exists
+  teacher_owns_student_grade
+
+Steps
+  sanitize
+  validate
+  execute
+
+SideEffects
+  notify_grade_updated
+
+---
+
+Action perform_address_update
+
+EventInput
+  student_id
+  Address
+
+ActionResult
+  student_id
+
+BusinessRules
+  student_exists
+
+Steps
+  sanitize
+  validate
+  execute
+
+---
+
+Action perform_graduation
+
+EventInput
+  student_id
+
+ActionResult
+  academic_state
+
+BusinessRules
+  student_exists
+  student_can_graduate
+
+Steps
+  sanitize
+  validate
+  execute
+
+SideEffects
+  send_graduation_email
+
+---
+
+Action notify_already_graduated
+
+EventInput
+  student_id
+
+ActionResult
+  academic_state
+
+Steps
+  execute
+
+---
+
+Action notify_call_security
+
+EventInput
+  student_id
+
+ActionResult
+  academic_state
+
+Steps
+  execute
+
+SideEffects
+  alert_security_team
+
+---
+
+Action perform_send_grades_to_parents
+
+EventInput
+  student_id
+
+ActionResult
+  student_id
+
+BusinessRules
+  student_exists
+  parents_contact_available
+
+Steps
+  sanitize
+  validate
+  execute
+
+SideEffects
+  send_grades_email_to_parents
+
+---
+
+Action skip_send_grades
+
+EventInput
+  student_id
+
+ActionResult
+  student_id
+
+Steps
+  execute
+
+---
+
+Action reject_request
+
+EventInput
+  student_id
+
+ActionResult
+  academic_state
+
+Steps
+  execute

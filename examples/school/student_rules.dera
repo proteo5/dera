@@ -1,0 +1,26 @@
+Rules
+
+Event create_student
+  NewEntry  Action perform_student_creation
+
+Event check_grades
+  DefaultAction perform_check_grades
+
+Event set_grades_to_student
+  DefaultAction perform_set_grades
+
+Event update_student_address
+  DefaultAction perform_address_update
+
+Event graduate_student
+  When academic = Active      Action perform_graduation
+  When academic = Graduated   Action notify_already_graduated
+  When academic = Expelled    Action notify_call_security
+  DefaultAction reject_request
+
+Event send_grades_to_parents_on_first_day_of_month
+  When academic = Active      Action perform_send_grades_to_parents
+  When academic = Graduated   Action perform_send_grades_to_parents
+  When academic = Suspended   Action perform_send_grades_to_parents
+  When academic = Expelled    Action skip_send_grades
+  DefaultAction reject_request

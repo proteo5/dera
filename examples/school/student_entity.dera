@@ -1,0 +1,50 @@
+Entity Student
+
+Catalogs
+
+Grades
+  1
+  2
+  3
+  4
+  5
+  6
+
+Groups
+  A
+  B
+  C
+
+Schema
+
+Name
+  type text
+  required
+  min 5
+  max 50
+
+LastName
+  type text
+  required
+  min 5
+  max 50
+
+Grade
+  type catalog Grades
+  required
+
+Group
+  type catalog Groups
+  required
+
+DateOfBirth
+  type date
+  required
+
+States
+
+Academic
+  Active
+  Graduated
+  Suspended
+  Expelled
