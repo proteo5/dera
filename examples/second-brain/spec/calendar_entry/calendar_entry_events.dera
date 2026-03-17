@@ -1,0 +1,23 @@
+Entity CalendarEntry
+
+Event create_calendar_entry
+  EventInput
+    space_id        UUID      required
+    title           string    required
+    description     string    optional
+    datetime_start  datetime  required
+    datetime_end    datetime  required
+    task_id         UUID      optional
+
+Event update_calendar_entry
+  EventInput
+    calendar_entry_id   UUID      required
+    title               string    optional
+    description         string    optional
+    datetime_start      datetime  optional
+    datetime_end        datetime  optional
+    task_id             UUID      optional  — can link or unlink a task
+
+Event archive_calendar_entry
+  EventInput
+    calendar_entry_id   UUID    required

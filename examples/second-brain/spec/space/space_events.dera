@@ -1,0 +1,27 @@
+Entity Space
+
+Event create_space
+  EventInput
+    name          string        required
+    icon          string        optional
+    color         string        optional
+    description   string        optional
+
+Event update_space
+  EventInput
+    space_id      UUID          required
+    name          string        optional
+    icon          string        optional
+    color         string        optional
+    description   string        optional
+
+Event archive_space
+  EventInput
+    space_id      UUID          required
+
+Event search_space
+  EventInput
+    space_id      UUID          required
+    query         string        required — full-text search term
+    entity_types  string[]      optional — filter by entity type (Task, Note, Activity, etc.)
+                                defaults to all entity types

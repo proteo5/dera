@@ -1,0 +1,48 @@
+Entity Summary
+
+# Summary is an AI-generated executive report for a time period within a Space.
+# It is produced and updated by Sistema every night.
+#
+# Daily summaries are new every day.
+# Weekly / Monthly / Quarterly / Semiannual / Annual summaries are created
+# at the start of their period and updated nightly until the period closes.
+#
+# The AI analysis reads both structured data (task counts, statuses)
+# and the content of manual Notes written during the period.
+
+Schema
+  summary_id              UUID          primary key
+  space_id                UUID          foreign key → Space
+  period_type             PeriodType    required
+  period_start            date          required
+  period_end              date          required
+
+  # Structured data — computed at generation / update time
+  completed_tasks_count   integer       count of Tasks completed in period
+  skipped_tasks_count     integer       count of Tasks skipped in period
+  autoclosed_tasks_count  integer       count of Tasks autoclosed in period
+  in_progress_task_ids    UUID[]        Tasks currently InProgress at time of generation
+  upcoming_task_ids       UUID[]        Tasks with start_date in the next 7 days
+
+  # AI-generated content
+  ai_executive_summary    text          high-level summary of the period
+  ai_delayed_items        text          tasks and activities behind schedule
+  ai_attention_items      text          things the user should focus on
+  ai_general_analysis     text          patterns, observations, recommendations
+
+  generated_at            datetime      when the Summary was first created
+  last_updated_at         datetime      when the Summary was last updated by Sistema
+
+Catalogs
+  PeriodType
+    daily
+    weekly
+    monthly
+    quarterly
+    semiannual
+    annual
+
+States
+  status    Active | Closed
+  # Active  — period is in progress, Sistema updates this Summary every night
+  # Closed  — period has ended, Summary is final and will not be updated again

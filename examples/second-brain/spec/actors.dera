@@ -1,0 +1,60 @@
+# =============================================================================
+# Second Brain — Actors
+# =============================================================================
+# Events are owned by entities. Actors declare which events they can trigger.
+# The relationship is many-to-many: the same event can be triggered
+# by multiple actors, and each actor can trigger events on multiple entities.
+# =============================================================================
+
+Actor Usuario
+  User:
+    register_user
+    search_all
+
+  Space:
+    create_space
+    update_space
+    archive_space
+
+  Activity:
+    create_activity
+    update_activity
+    pause_activity
+    resume_activity
+    archive_activity
+
+  Task:
+    create_task
+    update_task
+    start_task
+    complete_task
+    skip_task
+    reopen_task
+    add_task_comment
+    update_task_comment
+    archive_task_comment
+
+  Note:
+    create_note
+    update_note
+    archive_note
+
+  CalendarEntry:
+    create_calendar_entry
+    update_calendar_entry
+    archive_calendar_entry
+
+Actor Sistema
+  Activity:
+    generate_task_from_activity
+
+  Task:
+    autoclose_task
+    archive_task
+
+  Note:
+    create_automatic_note
+
+  Summary:
+    generate_daily_summary
+    update_summary

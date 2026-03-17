@@ -1,0 +1,29 @@
+Entity Activity
+
+Event create_activity
+  NewEntry  Action perform_activity_creation
+
+Event update_activity
+  When status = Active    Action perform_activity_update
+  When status = Paused    Action perform_activity_update
+  When status = Archived  Action reject_request
+
+Event pause_activity
+  When status = Active    Action perform_activity_pause
+  When status = Paused    Action notify_already_paused
+  When status = Archived  Action reject_request
+
+Event resume_activity
+  When status = Paused    Action perform_activity_resume
+  When status = Active    Action notify_already_active
+  When status = Archived  Action reject_request
+
+Event archive_activity
+  When status = Active    Action perform_activity_archive
+  When status = Paused    Action perform_activity_archive
+  When status = Archived  Action notify_already_archived
+
+Event generate_task_from_activity
+  When status = Active    Action perform_task_generation
+  When status = Paused    Action skip_task_generation
+  When status = Archived  Action skip_task_generation

@@ -1,0 +1,55 @@
+Entity Activity
+
+Event create_activity
+  EventInput
+    space_id                    UUID            required
+    name                        string          required
+    description                 string          optional
+    recurrence_type             RecurrenceType  required
+    every_n                     integer         optional  default 1
+    days_of_week                DayOfWeek[]     optional  required when recurrence_type = Weekly
+    monthly_type                MonthlyType     optional  required when recurrence_type = Monthly
+    day_of_month                integer         optional  required when monthly_type = ByDayOfMonth
+    week_of_month               WeekOfMonth     optional  required when monthly_type = ByDayOfWeek
+    day_of_week_monthly         DayOfWeek       optional  required when monthly_type = ByDayOfWeek
+    annual_month                integer         optional  required when recurrence_type = Annual
+    annual_day                  integer         optional  required when recurrence_type = Annual
+    task_start_offset_days      integer         optional  default 0
+    task_due_offset_days        integer         required
+    task_autoclose_offset_days  integer         required
+    active_from                 date            required
+    active_until                date            optional
+    end_type                    EndType         optional  default Never
+    end_after_n_occurrences     integer         optional  required when end_type = AfterNOccurrences
+
+Event update_activity
+  EventInput
+    activity_id                 UUID            required
+    name                        string          optional
+    description                 string          optional
+    task_due_offset_days        integer         optional
+    task_autoclose_offset_days  integer         optional
+    active_until                date            optional
+    end_type                    EndType         optional
+    end_after_n_occurrences     integer         optional
+    # Note: recurrence_type and schedule fields are not updatable.
+    # If recurrence needs to change, archive this activity and create a new one.
+
+Event pause_activity
+  EventInput
+    activity_id   UUID    required
+
+Event resume_activity
+  EventInput
+    activity_id   UUID    required
+
+Event archive_activity
+  EventInput
+    activity_id   UUID    required
+
+Event generate_task_from_activity
+  # Triggered by Sistema cron — checks all Active activities
+  # and generates tasks for the current recurrence period if not already generated
+  EventInput
+    activity_id         UUID    required
+    recurrence_date     date    required  the trigger date for this recurrence period

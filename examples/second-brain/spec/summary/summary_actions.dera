@@ -1,0 +1,51 @@
+Entity Summary
+
+Action perform_summary_generation
+  EventInput
+    space_id, period_type, period_start, period_end   required
+  BusinessRules
+    - A Summary for this space_id + period_type + period_start must not already exist
+    - space_id must reference an existing Space (Active or Archived)
+  Steps
+    - Query Tasks in space for the period:
+        completed_tasks   = Tasks with status = Completed within period
+        skipped_tasks     = Tasks with status = Skipped within period
+        autoclosed_tasks  = Tasks with status = AutoClosed within period
+        in_progress_tasks = Tasks with status = InProgress at period_end or now
+        upcoming_tasks    = Tasks with start_date within next 7 days from period_end
+    - Query Notes in space for the period:
+        manual_notes      = Notes with type = manual and note_date within period
+    - Call AI with structured data + manual note content:
+        Produce: ai_executive_summary, ai_delayed_items,
+                 ai_attention_items, ai_general_analysis
+    - Create Summary record:
+        status = Active if period_end > today
+        status = Closed if period_end <= today
+  SideEffects
+    - Trigger create_automatic_note with type = summary_generated
+  ActionResult
+    summary_id    UUID
+
+Action perform_summary_update
+  EventInput
+    summary_id    required
+  BusinessRules
+    - Summary status must be Active (enforced by rules engine)
+    - If period_end < today: transition status to Closed after update
+  Steps
+    - Re-query Tasks and Notes for the period with updated data
+    - Re-run AI analysis with refreshed data
+    - Update all computed fields and AI content
+    - Update last_updated_at to now
+    - If period_end < today: update status to Closed
+  SideEffects
+    - None  (nightly updates do not generate new automatic notes)
+  ActionResult
+    summary_id      UUID
+    status          SummaryStatus   final status after update (Active or Closed)
+
+Action skip_summary_update
+  Steps
+    - No state change. Summary period has already closed.
+  Outcome
+    NoAction    SUMMARY_ALREADY_CLOSED

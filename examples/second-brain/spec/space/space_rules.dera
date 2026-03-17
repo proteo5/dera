@@ -1,0 +1,16 @@
+Entity Space
+
+Event create_space
+  NewEntry  Action perform_space_creation
+
+Event update_space
+  When status = Active    Action perform_space_update
+  When status = Archived  Action reject_request
+
+Event archive_space
+  When status = Active    Action perform_space_archive
+  When status = Archived  Action notify_already_archived
+
+Event search_space
+  When status = Active    Action perform_search
+  When status = Archived  Action reject_request

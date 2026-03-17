@@ -1,0 +1,32 @@
+Entity Note
+
+Event create_note
+  # Manual note created by Usuario
+  EventInput
+    space_id    UUID    required
+    title       string  optional
+    body        string  required
+    note_date   date    optional  defaults to today if not provided
+
+Event update_note
+  EventInput
+    note_id   UUID    required
+    title     string  optional
+    body      string  optional
+    note_date date    optional
+    # Note: at least one field must be provided
+
+Event archive_note
+  EventInput
+    note_id   UUID    required
+
+Event create_automatic_note
+  # Triggered by Sistema as a side effect of other domain events.
+  # Never called directly by Usuario.
+  EventInput
+    space_id        UUID        required
+    type            NoteType    required   must not be "manual"
+    body            string      required
+    note_date       date        required
+    reference_id    UUID        optional
+    reference_type  EntityType  optional

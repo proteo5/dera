@@ -1,0 +1,56 @@
+Entity CalendarEntry
+
+Action perform_calendar_entry_creation
+  EventInput
+    space_id, title, datetime_start, datetime_end   required
+    description, task_id                             optional
+  BusinessRules
+    - space_id must reference an Active Space owned by the actor
+    - datetime_end must be > datetime_start
+    - If task_id provided: task must exist in the same space
+  Steps
+    - Create CalendarEntry record with status = Active
+  SideEffects
+    - Trigger create_automatic_note with type = calendar_entry_created
+  ActionResult
+    calendar_entry_id   UUID
+
+Action perform_calendar_entry_update
+  EventInput
+    calendar_entry_id                                       required
+    title, description, datetime_start, datetime_end, task_id   optional
+  BusinessRules
+    - At least one field must be provided
+    - If both datetime_start and datetime_end provided: end must be > start
+    - If only datetime_end provided: must be > existing datetime_start
+    - If only datetime_start provided: must be < existing datetime_end
+    - If task_id provided: task must exist in the same space
+  Steps
+    - Update provided fields on CalendarEntry record
+  SideEffects
+    - None
+  ActionResult
+    calendar_entry_id   UUID
+    updated_fields      string[]
+
+Action perform_calendar_entry_archive
+  EventInput
+    calendar_entry_id   required
+  Steps
+    - Update CalendarEntry status to Archived
+  SideEffects
+    - None
+  ActionResult
+    calendar_entry_id   UUID
+
+Action notify_already_archived
+  Steps
+    - No state change
+  Outcome
+    NoAction    CALENDAR_ENTRY_ALREADY_ARCHIVED
+
+Action reject_request
+  Steps
+    - No state change
+  Outcome
+    NoAction    REQUEST_REJECTED

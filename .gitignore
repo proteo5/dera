@@ -1,0 +1,111 @@
+# =============================================================================
+# DERA Repository — .gitignore
+# =============================================================================
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+build/
+out/
+.next/
+.nuxt/
+
+# Prisma generated client
+**/prisma/client/
+**/@prisma/client/
+
+# Environment variables — NEVER commit secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Testing
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+.vitest/
+
+# TypeScript
+*.tsbuildinfo
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+desktop.ini
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Package manager locks (keep only one — uncomment your choice)
+# yarn.lock
+# pnpm-lock.yaml
+# Keeping package-lock.json by default
+
+# Docker
+.docker/
+
+# Terraform state (Deployer AI IaC — state files contain secrets)
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraformrc
+terraform.rc
+
+# Ansible sensitive files
+*.vault_pass
+ansible/inventory/production
+ansible/inventory/staging
+
+# Secrets and credentials — belt + suspenders
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
+credentials/
+.secrets
+
+# Prisma migrations SQLite dev db
+*.db
+*.db-journal
+dev.db
+
+# DERA runtime artifacts (future)
+runtime/.cache/
+validator/.cache/

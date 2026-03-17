@@ -1,0 +1,12 @@
+Entity CalendarEntry
+
+Event create_calendar_entry
+  NewEntry  Action perform_calendar_entry_creation
+
+Event update_calendar_entry
+  When status = Active    Action perform_calendar_entry_update
+  When status = Archived  Action reject_request
+
+Event archive_calendar_entry
+  When status = Active    Action perform_calendar_entry_archive
+  When status = Archived  Action notify_already_archived

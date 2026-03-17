@@ -1,0 +1,55 @@
+Entity Task
+
+# Routing pattern for User task status events:
+# The only blocked state is Archived — it is the only true terminal state.
+# Any non-Archived status can transition to any other non-Archived status.
+# This applies uniformly to: start_task, complete_task, skip_task, reopen_task.
+
+Event create_task
+  NewEntry  Action perform_task_creation
+
+Event update_task
+  When status = Archived  Action reject_request
+  DefaultAction           Action perform_task_update
+
+Event start_task
+  When status = Archived  Action reject_request
+  DefaultAction           Action perform_task_start
+
+Event complete_task
+  When status = Archived  Action reject_request
+  DefaultAction           Action perform_task_complete
+
+Event skip_task
+  When status = Archived  Action reject_request
+  DefaultAction           Action perform_task_skip
+
+Event reopen_task
+  When status = Archived  Action reject_request
+  DefaultAction           Action perform_task_reopen
+
+Event add_task_comment
+  When status = Archived  Action reject_request
+  DefaultAction           Action perform_add_task_comment
+
+Event update_task_comment
+  When status = Archived  Action reject_request
+  DefaultAction           Action perform_update_task_comment
+
+Event archive_task_comment
+  When status = Archived  Action reject_request
+  DefaultAction           Action perform_archive_task_comment
+
+Event autoclose_task
+  When status = Pending     Action perform_task_autoclose
+  When status = InProgress  Action perform_task_autoclose
+  When status = Completed   Action skip_autoclose
+  When status = Skipped     Action skip_autoclose
+  When status = AutoClosed  Action skip_autoclose
+  When status = Archived    Action skip_autoclose
+
+Event archive_task
+  When status = Completed   Action perform_task_archive
+  When status = Skipped     Action perform_task_archive
+  When status = AutoClosed  Action perform_task_archive
+  DefaultAction             Action skip_archive

@@ -1,0 +1,88 @@
+Entity Space
+
+Action perform_space_creation
+  EventInput
+    name          required
+    icon          optional
+    color         optional
+    description   optional
+  BusinessRules
+    - User must not already have a space with the same name
+  Steps
+    - Create Space record with status = Active
+  SideEffects
+    - None
+  ActionResult
+    space_id      UUID
+
+Action perform_space_update
+  EventInput
+    space_id      required
+    name          optional
+    icon          optional
+    color         optional
+    description   optional
+  BusinessRules
+    - At least one field must be provided for update
+  Steps
+    - Update provided fields on Space record
+  SideEffects
+    - None
+  ActionResult
+    space_id      UUID
+    updated_fields  string[]
+
+Action perform_space_archive
+  EventInput
+    space_id      required
+  BusinessRules
+    - None
+  Steps
+    - Update Space status to Archived
+    - Cascade: update all Activities in space to status = Archived
+    - Cascade: update all Tasks in space to status = Archived
+    - Cascade: update all Notes in space to status = Archived
+    - Cascade: update all CalendarEntries in space to archived = true
+    - Cascade: update all Summaries in space to status = Closed
+  SideEffects
+    - None
+  ActionResult
+    space_id          UUID
+    archived_counts   object    counts of each entity type archived
+
+Action notify_already_archived
+  EventInput
+    space_id      required
+  Steps
+    - No state change
+  ActionResult
+    space_id      UUID
+  Outcome
+    NoAction      SPACE_ALREADY_ARCHIVED
+
+Action reject_request
+  Steps
+    - No state change
+  ActionResult
+    None
+  Outcome
+    NoAction      REQUEST_REJECTED
+
+Action perform_search
+  EventInput
+    space_id      required
+    query         required
+    entity_types  optional
+  BusinessRules
+    - query must be at least 2 characters
+  Steps
+    - Execute full-text search across requested entity types within space
+    - Search targets: Task.title, Task.description, Note.title, Note.body,
+      Activity.name, Activity.description, CalendarEntry.title,
+      CalendarEntry.description, TaskComment.content
+    - Return ranked results
+  SideEffects
+    - None
+  ActionResult
+    results       object[]    list of matches with entity_type, entity_id, title, excerpt, score
+    total_count   integer

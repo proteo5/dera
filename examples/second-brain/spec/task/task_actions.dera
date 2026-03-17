@@ -1,0 +1,167 @@
+Entity Task
+
+Action perform_task_creation
+  EventInput
+    space_id, title, start_date, due_date, autoclose_date   required
+    description, reference_task_id                           optional
+  BusinessRules
+    - space_id must reference an Active Space owned by the actor
+    - due_date must be >= start_date
+    - autoclose_date must be >= due_date
+    - If reference_task_id provided: referenced task must exist in the same space
+  Steps
+    - Create Task record with status = Pending
+    - activity_id = null (manual creation)
+  SideEffects
+    - Trigger create_automatic_note with type = task_created
+  ActionResult
+    task_id   UUID
+
+Action perform_task_update
+  EventInput
+    task_id                         required
+    title, description, start_date,
+    due_date, autoclose_date        optional
+  BusinessRules
+    - At least one field must be provided
+    - If due_date provided: must be >= start_date (existing or new)
+    - If autoclose_date provided: must be >= due_date (existing or new)
+  Steps
+    - Update provided fields on Task record
+  SideEffects
+    - None  (ChangeLog records all field changes — visible to user as history)
+  ActionResult
+    task_id         UUID
+    updated_fields  string[]
+
+Action perform_task_start
+  EventInput
+    task_id   required
+  Steps
+    - Update Task status to InProgress
+  SideEffects
+    - Trigger create_automatic_note with type = task_status_changed
+  ActionResult
+    task_id           UUID
+    previous_status   TaskStatus
+    new_status        InProgress
+
+Action perform_task_complete
+  EventInput
+    task_id   required
+  Steps
+    - Update Task status to Completed
+  SideEffects
+    - Trigger create_automatic_note with type = task_status_changed
+  ActionResult
+    task_id           UUID
+    previous_status   TaskStatus
+    new_status        Completed
+
+Action perform_task_skip
+  EventInput
+    task_id   required
+  Steps
+    - Update Task status to Skipped
+  SideEffects
+    - Trigger create_automatic_note with type = task_status_changed
+  ActionResult
+    task_id           UUID
+    previous_status   TaskStatus
+    new_status        Skipped
+
+Action perform_task_reopen
+  EventInput
+    task_id   required
+  Steps
+    - Update Task status to Pending
+  SideEffects
+    - Trigger create_automatic_note with type = task_status_changed
+  ActionResult
+    task_id           UUID
+    previous_status   TaskStatus
+    new_status        Pending
+
+Action perform_add_task_comment
+  EventInput
+    task_id   required
+    content   required
+  Steps
+    - Create TaskComment record with status = Active
+  SideEffects
+    - Trigger create_automatic_note with type = task_comment_added
+  ActionResult
+    comment_id  UUID
+    task_id     UUID
+
+Action perform_update_task_comment
+  EventInput
+    task_id     required
+    comment_id  required
+    content     required
+  BusinessRules
+    - comment_id must belong to task_id
+    - TaskComment status must be Active
+  Steps
+    - Update TaskComment content
+  SideEffects
+    - None  (ChangeLog records the change)
+  ActionResult
+    comment_id  UUID
+
+Action perform_archive_task_comment
+  EventInput
+    task_id     required
+    comment_id  required
+  BusinessRules
+    - comment_id must belong to task_id
+    - TaskComment status must be Active
+  Steps
+    - Update TaskComment status to Archived
+  SideEffects
+    - None
+  ActionResult
+    comment_id  UUID
+
+Action perform_task_autoclose
+  EventInput
+    task_id   required
+  BusinessRules
+    - autoclose_date must be <= today
+  Steps
+    - Update Task status to AutoClosed
+  SideEffects
+    - Trigger create_automatic_note with type = task_autoclosed
+  ActionResult
+    task_id   UUID
+
+Action perform_task_archive
+  EventInput
+    task_id   required
+  BusinessRules
+    - Task must have been in Completed | Skipped | AutoClosed for >= 14 days
+      (measured from the timestamp of the last status change in ChangeLog)
+  Steps
+    - Update Task status to Archived
+  SideEffects
+    - None  (archive is silent — no automatic note)
+  ActionResult
+    task_id   UUID
+
+Action reject_request
+  Steps
+    - No state change
+  Outcome
+    NoAction    REQUEST_REJECTED
+
+Action skip_autoclose
+  Steps
+    - No state change. Task is already in a terminal or Archived state.
+  Outcome
+    NoAction    AUTOCLOSE_SKIPPED
+
+Action skip_archive
+  Steps
+    - No state change. Task is not in an archivable state.
+  Outcome
+    NoAction    ARCHIVE_SKIPPED

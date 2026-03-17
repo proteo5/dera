@@ -1,0 +1,15 @@
+Entity Note
+
+Event create_note
+  NewEntry  Action perform_note_creation
+
+Event update_note
+  When status = Active    Action perform_note_update
+  When status = Archived  Action reject_request
+
+Event archive_note
+  When status = Active    Action perform_note_archive
+  When status = Archived  Action notify_already_archived
+
+Event create_automatic_note
+  NewEntry  Action perform_automatic_note_creation

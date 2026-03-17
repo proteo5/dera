@@ -1,0 +1,64 @@
+Entity Task
+
+Event create_task
+  # Manual task creation. activity_id is never set here.
+  EventInput
+    space_id            UUID    required
+    title               string  required
+    description         string  optional
+    start_date          date    required
+    due_date            date    required
+    autoclose_date      date    required
+    reference_task_id   UUID    optional
+
+Event update_task
+  EventInput
+    task_id         UUID    required
+    title           string  optional
+    description     string  optional
+    start_date      date    optional
+    due_date        date    optional
+    autoclose_date  date    optional
+
+Event start_task
+  EventInput
+    task_id   UUID    required
+
+Event complete_task
+  EventInput
+    task_id   UUID    required
+
+Event skip_task
+  EventInput
+    task_id   UUID    required
+
+Event reopen_task
+  EventInput
+    task_id   UUID    required
+
+Event add_task_comment
+  EventInput
+    task_id   UUID    required
+    content   string  required
+
+Event update_task_comment
+  EventInput
+    task_id     UUID    required
+    comment_id  UUID    required
+    content     string  required
+
+Event archive_task_comment
+  EventInput
+    task_id     UUID    required
+    comment_id  UUID    required
+
+Event autoclose_task
+  # Triggered by Sistema cron — fires when autoclose_date is reached
+  EventInput
+    task_id   UUID    required
+
+Event archive_task
+  # Triggered by Sistema cron — fires when task has been in
+  # Completed | Skipped | AutoClosed for >= 14 days
+  EventInput
+    task_id   UUID    required

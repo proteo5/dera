@@ -258,3 +258,141 @@ patch/vX.Y+1      public bug fix branches
 | Active | Production.Manifest as vX.0 | No |
 | Patching | patch/vX.Y branch | Yes until merged |
 | Archived | Historical manifest | No |
+
+---
+
+# 12. Development Stages: MVP vs Production
+
+Every system built with DERA passes through two distinct lifecycle stages.
+Each stage has different feedback sources, different Monitor AI behavior, and
+different definitions of what "done" means.
+
+---
+
+## Stage 1 — MVP (No Production Environment)
+
+In the MVP stage, no production environment exists yet.
+The team is building the initial system and validating it with stakeholders.
+
+```
+Environments active:
+  Development   → InDev branches, active code generation
+  Staging       → Integration testing, stakeholder review
+  Tester slots  → Independent verification by Tester AI
+
+No Production environment. No deploy versions assigned yet.
+```
+
+### Feedback Source in MVP Stage
+
+Feedback comes from **Staging**, not from production errors.
+
+```
+Stakeholder reviews behavior on Staging
+       ↓
+Identifies mismatches → reported as Logic bugs (spec issues)
+Identifies failures   → reported as Technical bugs (code issues)
+       ↓
+Analyst AI or Builder AI resolves
+       ↓
+Fix verified on Staging
+       ↓
+Cycle continues until stakeholder approves
+```
+
+### Monitor AI in MVP Stage
+
+Monitor AI is **not active** in MVP stage. There is no production ErrorLog to watch.
+
+Feedback is human-driven: stakeholders and testers report issues manually.
+All bugs in this stage are **private bugs** — documented inside the relevant REQ-XXX.
+
+### What "Done" Means in MVP Stage
+
+MVP is complete when the stakeholder approves the behavior on Staging
+and the Tester AI confirms all spec scenarios pass.
+
+At that point, the first production deploy is authorized:
+
+```
+First deploy to Production
+       ↓
+First deploy tag created:    deploy-YYYY.MM.DD.001
+First version assigned:      Student → v1.0  (or whatever the first version is)
+       ↓
+Production.Manifest created
+       ↓
+Stage 2 begins
+```
+
+---
+
+## Stage 2 — Production
+
+Once Production exists, the system enters continuous delivery mode.
+
+```
+Environments active:
+  Production    → live system, versioned deploys
+  Staging       → integration and regression testing
+  Development   → active InDev requirements
+  Tester slots  → Tester AI verification
+```
+
+### Feedback Source in Production Stage
+
+Feedback comes from **two sources simultaneously**:
+
+```
+1. Production ErrorLog   → Monitor AI detects and classifies automatically
+2. Stakeholder requests  → New requirements opened as REQ-XXX
+```
+
+These are independent tracks. A Monitor AI triage entry does not block
+a new requirement from starting InDev.
+
+### Monitor AI in Production Stage
+
+Monitor AI becomes **fully active** once Production exists.
+
+It reads the Production ErrorLog continuously and drives the auto-repair cycle
+as defined in `dera_monitor_ai.md`.
+
+```
+Production deploy goes live
+       ↓
+Monitor AI starts watching ErrorLog
+       ↓
+Errors classified: Technical → Builder AI  |  Logic → Analyst AI
+       ↓
+Public bug entries created in /triage/
+       ↓
+Repair cycle runs: fix → test → patch deploy → verify → Resolved
+```
+
+### What "Done" Means in Production Stage
+
+There is no final "done" in production. The system is in a continuous cycle:
+
+```
+Requirements (new features)     → REQ pipeline → version increments
+Public bugs (production errors) → triage pipeline → patch versions
+```
+
+The system stabilizes as Monitor AI resolves the backlog and
+the ratio of bugs to new features decreases over time.
+
+---
+
+## Stage Comparison
+
+| Concern | MVP Stage | Production Stage |
+|---------|-----------|-----------------|
+| Production environment | Does not exist | Active, versioned |
+| Error feedback source | Stakeholders on Staging | Monitor AI on ErrorLog |
+| Bug documentation | Private (inside REQ-XXX) | Public (/triage/) |
+| Monitor AI | Inactive | Fully active |
+| Version numbers | Not assigned yet | Assigned at each deploy |
+| Deploy tags | Not created yet | Created at every deploy |
+| Rollback target | Not applicable | Previous deploy tag |
+| "Done" definition | Stakeholder approves Staging | Continuous — no final done |

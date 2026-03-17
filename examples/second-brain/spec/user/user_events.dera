@@ -1,0 +1,18 @@
+Entity User
+
+Event register_user
+  # Triggered on first login — creates the User profile record.
+  # Subsequent logins do not trigger this event (idempotency via user_id).
+  EventInput
+    user_id   string    required — from Supabase Auth token
+    email     string    required — from Supabase Auth token
+
+Event search_all
+  # Full-text search across all active data owned by the user.
+  # Searches all Spaces. Results include path for context.
+  EventInput
+    query         string    required  minimum 2 characters
+    entity_types  string[]  optional  filter by entity type
+                                      allowed: Task, Note, Activity,
+                                               CalendarEntry, TaskComment
+                                      default: all types

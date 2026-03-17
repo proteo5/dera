@@ -1,0 +1,70 @@
+Entity Note
+
+Action perform_note_creation
+  EventInput
+    space_id    required
+    body        required
+    title       optional
+    note_date   optional
+  BusinessRules
+    - space_id must reference an Active Space owned by the actor
+  Steps
+    - Create Note record with type = manual, status = Active
+    - If note_date not provided: set to today
+  SideEffects
+    - None  (manual notes do not generate automatic notes)
+  ActionResult
+    note_id   UUID
+
+Action perform_note_update
+  EventInput
+    note_id             required
+    title, body, note_date  optional
+  BusinessRules
+    - At least one field must be provided
+  Steps
+    - Update provided fields on Note record
+  SideEffects
+    - Trigger create_automatic_note with type = note_edited
+      referencing this note_id
+  ActionResult
+    note_id         UUID
+    updated_fields  string[]
+
+Action perform_note_archive
+  EventInput
+    note_id   required
+  Steps
+    - Update Note status to Archived
+  SideEffects
+    - None
+  ActionResult
+    note_id   UUID
+
+Action notify_already_archived
+  Steps
+    - No state change
+  Outcome
+    NoAction    NOTE_ALREADY_ARCHIVED
+
+Action reject_request
+  Steps
+    - No state change
+  Outcome
+    NoAction    REQUEST_REJECTED
+
+Action perform_automatic_note_creation
+  EventInput
+    space_id, type, body, note_date   required
+    reference_id, reference_type      optional
+  BusinessRules
+    - type must not be "manual" — automatic notes are never of type manual
+    - space_id must reference an existing Space (Active or Archived)
+      Note: automatic notes are written even if space is Archived
+      to preserve the audit trail
+  Steps
+    - Create Note record with provided type, status = Active
+  SideEffects
+    - None  (automatic notes do not trigger further automatic notes)
+  ActionResult
+    note_id   UUID

@@ -1,0 +1,12 @@
+Entity Space
+
+Schema
+  space_id      UUID          primary key
+  user_id       string        owner — provided by Auth provider (Auth0)
+  name          string        display name of the space
+  icon          string        emoji or icon identifier
+  color         string        hex color code for visual differentiation
+  description   string        optional — purpose or description of the space
+
+States
+  status        Active | Archived

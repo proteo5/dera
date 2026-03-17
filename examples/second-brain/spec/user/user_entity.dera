@@ -1,0 +1,11 @@
+Entity User
+
+# User identity is managed by Supabase Auth (external provider).
+# This entity stores the application-level profile that references
+# the Auth provider's user_id.
+# User has no state dimension — lifecycle is managed by Supabase Auth.
+
+Schema
+  user_id     string    primary key — provided by Supabase Auth (UUID format)
+  email       string    required — synced from Supabase Auth
+  created_at  datetime  required

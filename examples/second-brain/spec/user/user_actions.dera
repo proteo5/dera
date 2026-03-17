@@ -1,0 +1,44 @@
+Entity User
+
+Action perform_user_registration
+  EventInput
+    user_id   required
+    email     required
+  BusinessRules
+    - user_id must not already exist (idempotency — first login only)
+  Steps
+    - Create User record
+  SideEffects
+    - None
+  ActionResult
+    user_id   string
+
+Action perform_search_all
+  EventInput
+    query         required
+    entity_types  optional
+  BusinessRules
+    - query must be at least 2 characters
+  Steps
+    - Execute PostgreSQL FTS query across all active Spaces owned by the user
+    - Search targets per entity type:
+        Task:           title, description
+        Note:           title, body            (type = manual only)
+        Activity:       name, description
+        CalendarEntry:  title, description
+        TaskComment:    content
+    - Filter: only Active records (status = Active or non-archived)
+    - Filter: only records within Spaces owned by the requesting user
+    - Rank results by ts_rank relevance score
+    - Each result includes path:  SpaceName / EntityType / Title
+  SideEffects
+    - None
+  ActionResult
+    results       object[]
+      entity_type   string    Task | Note | Activity | CalendarEntry | TaskComment
+      entity_id     UUID
+      title         string    display title of the match
+      excerpt       string    snippet with match highlighted
+      path          string    e.g. "Casa / Task / Pago hipoteca — Abril 2026"
+      score         float     relevance score from ts_rank
+    total_count   integer

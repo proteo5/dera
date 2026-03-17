@@ -1,0 +1,79 @@
+Entity Activity
+
+# Activity is a recurrence configuration that instructs Sistema
+# to generate Tasks automatically. Tasks generated from an Activity
+# carry the activity_id reference. Manually created Tasks have no Activity.
+
+Schema
+  activity_id               UUID          primary key
+  space_id                  UUID          foreign key → Space
+  name                      string        required
+  description               string        optional
+
+  # Recurrence definition — modeled after modern calendar standards
+  # (Google Calendar / Outlook style)
+  recurrence_type           RecurrenceType  required
+
+  # Shared: how often within the type (every N days/weeks/months/years)
+  every_n                   integer         required  default 1
+
+  # Weekly: which days of the week
+  days_of_week              DayOfWeek[]     optional  required when recurrence_type = Weekly
+
+  # Monthly: by fixed day number or by relative weekday
+  monthly_type              MonthlyType     optional  required when recurrence_type = Monthly
+  day_of_month              integer         optional  1–28, used when monthly_type = ByDayOfMonth
+  week_of_month             WeekOfMonth     optional  used when monthly_type = ByDayOfWeek
+  day_of_week_monthly       DayOfWeek       optional  used when monthly_type = ByDayOfWeek
+
+  # Annual: specific month and day
+  annual_month              integer         optional  1–12, required when recurrence_type = Annual
+  annual_day                integer         optional  1–28, required when recurrence_type = Annual
+
+  # Task window offsets (days from recurrence trigger date)
+  task_start_offset_days    integer         required  default 0
+  task_due_offset_days      integer         required  must be >= task_start_offset_days
+  task_autoclose_offset_days  integer       required  must be >= task_due_offset_days
+
+  # Period of activity generation
+  active_from               date            required
+  active_until              date            optional  null = indefinite
+
+  # End condition
+  end_type                  EndType         required  default Never
+  end_after_n_occurrences   integer         optional  required when end_type = AfterNOccurrences
+
+Catalogs
+  RecurrenceType
+    Daily
+    Weekly
+    Monthly
+    Annual
+
+  DayOfWeek
+    Monday
+    Tuesday
+    Wednesday
+    Thursday
+    Friday
+    Saturday
+    Sunday
+
+  MonthlyType
+    ByDayOfMonth
+    ByDayOfWeek
+
+  WeekOfMonth
+    First
+    Second
+    Third
+    Fourth
+    Last
+
+  EndType
+    Never
+    OnDate
+    AfterNOccurrences
+
+States
+  status    Active | Paused | Archived

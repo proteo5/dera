@@ -1,0 +1,7 @@
+Entity User
+
+Event register_user
+  NewEntry  Action perform_user_registration
+
+Event search_all
+  DefaultAction  Action perform_search_all

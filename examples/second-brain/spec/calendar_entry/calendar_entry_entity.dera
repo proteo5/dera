@@ -1,0 +1,21 @@
+Entity CalendarEntry
+
+# CalendarEntry is a time reference within a Space.
+# It may optionally be linked to a Task. A CalendarEntry without a Task
+# is a standalone time block (reminder, event, appointment).
+# CalendarEntry has no state dimension — it is a pure time reference.
+
+Schema
+  calendar_entry_id   UUID      primary key
+  space_id            UUID      foreign key → Space
+  task_id             UUID      optional — foreign key → Task
+  title               string    required
+  description         string    optional
+  datetime_start      datetime  required
+  datetime_end        datetime  required  must be > datetime_start
+  is_archived         boolean   — NOT a state dimension.
+                                  Represented as: status Active | Archived
+                                  See States below.
+
+States
+  status    Active | Archived

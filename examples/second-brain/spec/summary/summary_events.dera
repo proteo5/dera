@@ -1,0 +1,18 @@
+Entity Summary
+
+Event generate_daily_summary
+  # Triggered by Sistema cron every night.
+  # Creates a new Summary for today (period_type = daily).
+  # Also creates new summaries for weekly/monthly/quarterly/semiannual/annual
+  # periods if today is the first day of that period.
+  EventInput
+    space_id      UUID    required
+    period_type   PeriodType  required
+    period_start  date    required
+    period_end    date    required
+
+Event update_summary
+  # Triggered by Sistema cron every night.
+  # Updates all Active summaries for the space (all period types still in progress).
+  EventInput
+    summary_id    UUID    required

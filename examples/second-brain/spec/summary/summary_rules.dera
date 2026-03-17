@@ -1,0 +1,8 @@
+Entity Summary
+
+Event generate_daily_summary
+  NewEntry  Action perform_summary_generation
+
+Event update_summary
+  When status = Active  Action perform_summary_update
+  When status = Closed  Action skip_summary_update
