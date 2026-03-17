@@ -30,6 +30,9 @@ EventInput
 Rules
 NewEntry
 When
+AND
+OR
+NOT
 Action
 ActionResult
 BusinessRules
@@ -50,6 +53,26 @@ No entity ID is expected in EventInput. No state evaluation occurs.
 Signals state-based routing for an existing entity.
 Requires entity ID in EventInput. The engine loads the entity and evaluates its current state.
 Must always be accompanied by a DefaultAction as a safety net.
+
+When conditions support boolean operators for multi-state evaluation:
+
+  AND   both conditions must be true
+  OR    either condition must be true
+  NOT   negates a single condition
+  ( )   parentheses for explicit grouping
+
+Operator precedence: AND before OR (standard boolean algebra).
+First matching rule wins. No cascading.
+
+Examples:
+
+  When academic = Active AND financial = Current
+  When academic = Active OR academic = Suspended
+  When academic = Active AND NOT financial = Blocked
+  When (academic = Active OR academic = Suspended) AND financial = Delinquent
+
+All state values referenced in When conditions must be declared
+in the entity States block. The validator enforces this constraint.
 
 ### DefaultAction (alone)
 Signals a direct action on an existing entity regardless of state.

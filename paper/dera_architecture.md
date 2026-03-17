@@ -345,6 +345,41 @@ Event graduate_student
 
 ---
 
+### Multi-State Conditions (AND / OR / NOT)
+
+When clauses support boolean operators to evaluate multiple state dimensions simultaneously.
+
+
+Rules
+
+Event enroll_in_exam
+  When academic = Active AND financial = Current
+    Action perform_exam_enrollment
+  When academic = Active AND financial = Delinquent
+    Action notify_payment_required
+  When academic = Suspended OR academic = Expelled
+    Action reject_enrollment
+  When academic = Active AND NOT financial = Blocked
+    Action perform_conditional_enrollment
+  DefaultAction reject_request
+
+
+Operator rules:
+
+- AND has precedence over OR (standard boolean algebra)
+- Parentheses can be used for explicit grouping
+- NOT negates a single condition
+- First matching rule wins — no cascading
+- All state values referenced must be declared in the entity States block
+
+The validator detects:
+
+- Overlapping conditions (two rules can match the same state vector)
+- Unreachable conditions (a rule that can never match given declared states)
+- Incomplete coverage (state combinations not handled by any When or DefaultAction)
+
+---
+
 ### Pattern 3 — Direct Action on Existing Entity
 
 Used when the event operates on an existing entity but the action does not depend on entity state.
@@ -539,64 +574,69 @@ Response
 
 ---
 
-# 19. Data Persistence Model
+# 19. System Data Model
 
-DERA distinguishes between **domain persistence** and **operational trace data**.
+Every DERA system is composed of five distinct data concerns.
 
-### Domain Data (Permanent)
+### 1. EventRequests
 
-Entities representing the state of the system.
+Stores the full incoming request including metadata and payload.
+Used for idempotency, traceability, and bug reproduction.
 
-Example:
+Key fields: EventId, TraceId, CorrelationId, ActorId, EventType,
+EntityId, EventInput (full payload), Status, ReceivedAt.
 
+### 2. Persistence (Domain Data)
 
-Student
-Teacher
-School
+The actual entity state. The permanent source of truth for the domain.
+Each entity defines its schema and state dimensions via `.dera` files.
 
+### 3. ChangeLog
 
----
+Immutable audit trail of every change to entity data or state.
+One record per field changed per event execution.
 
-### Operational Data (Temporary)
+Key fields: EventId, EntityType, EntityId, Field, OldValue, NewValue, ChangedAt, ActorId.
 
-Operational data includes:
+### 4. EventResults
 
-- EventRequests
-- EventResults
-- ChangeLogs
-- SystemLogs
+The structured outcome of every event execution.
 
-These records support:
+Key fields: EventId, Outcome, Code, Message, Data, FailedValidations, Warnings, TraceId, DurationMs.
 
-- idempotency
-- debugging
-- auditing
+### 5. ErrorLog
+
+Technical errors that occurred during system execution.
+Primary data source for Monitor AI.
+
+Key fields: EventId, ErrorType, ErrorMessage, StackTrace, ServiceName,
+EntityId, Environment, OccurredAt, Resolved, ResolvedByBug.
+
+See `paper/dera_data_model.md` for full field definitions and data flow diagrams.
 
 ---
 
 # 20. Data Retention Policy
 
-Operational data does not need to be stored permanently.
+| Data | Nature | Retention |
+|------|--------|-----------|
+| EventRequests | Operational | 3–12 months |
+| Persistence | Domain | Permanent |
+| ChangeLog | Audit | 3–12 months (permanent for regulated domains) |
+| EventResults | Operational | 3–12 months |
+| ErrorLog | Operational | 1–6 months |
 
-Typical retention policies:
-
-| Data | Retention |
-|-----|-----|
-EventRequests | 3–12 months |
-EventResults | 3–12 months |
-ChangeLogs | 3–12 months |
-SystemLogs | 1–6 months |
-
-Operational tables should be **continuously purged**.
-
-Example:
+All non-permanent tables should be continuously purged.
 
 
-DELETE FROM EventResults
-WHERE Timestamp < NOW() - INTERVAL '90 days'
+DELETE FROM EventRequests WHERE ReceivedAt < NOW() - INTERVAL '90 days';
+DELETE FROM ChangeLog     WHERE ChangedAt  < NOW() - INTERVAL '90 days';
+DELETE FROM EventResults  WHERE ExecutedAt < NOW() - INTERVAL '90 days';
+DELETE FROM ErrorLog      WHERE OccurredAt < NOW() - INTERVAL '30 days'
+                            AND Resolved = true;
 
 
-Domain data remains permanent.
+Domain data (Persistence) remains permanent.
 
 ---
 
@@ -626,27 +666,43 @@ This prevents invalid system designs before implementation.
 
 # 22. AI-Assisted Development Workflow
 
-DERA enables AI systems to participate in two stages.
+> **The code is disposable. The spec is permanent.**
 
-### Specification Stage
+DERA is built around two specialized AI roles that operate on separate concerns.
 
-AI assists in:
+---
 
-- identifying missing requirements
-- detecting logical conflicts
-- improving domain modeling
+### Analyst AI — Spec Guardian
 
-### Implementation Stage
+Owns the `.dera` specification files.
+Processes stakeholder requirements and produces updated specs.
+Corrects specs when a logic bug is reported.
+Never writes code.
 
-AI generates system components such as:
+### Builder AI — Code Executor
 
-- APIs
-- database schemas
-- micro-agents
-- tests
-- documentation
+Reads the `.dera` specification as source of truth.
+Generates or rewrites code completely from spec.
+Fixes code when a technical bug is reported.
+Never modifies the spec.
 
-The **DERA specification becomes the source of truth**.
+---
+
+### Why This Eliminates the Late-Fix Cost
+
+Traditional development has an exponential cost curve for fixing bugs.
+With DERA and AI, Analyst AI can update a spec in minutes and Builder AI
+can regenerate code immediately after. The cost of fixing at any stage
+is near zero.
+
+---
+
+### Full Workflow Documentation
+
+See dedicated documents for complete details:
+
+- `paper/dera_ai_workflow.md` — roles, flows, bug classification, interview process
+- `paper/dera_versioning.md` — requirements, versions, deploy manifests, git strategy
 
 ---
 
